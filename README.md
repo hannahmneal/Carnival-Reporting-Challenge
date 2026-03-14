@@ -122,6 +122,41 @@ Your team must complete **all required reports** in Sections 1-4. Section 5 cont
 | Toyota | Camry | 12 | 2020-03-15 | 2024-08-22 |
 | ... | ... | ... | ... | ... |
 
+**Note:** Run [`inventory_added_date.sql`](inventory_added_date.sql) for the missing date column.
+
+**Query:**
+```sql
+SELECT
+    vt.make AS "Make",
+    vt.model AS "Model",
+    COUNT(*) AS "Count in Stock",
+    MIN(v.inventory_added_date) AS "Oldest Vehicle Date",
+    MAX(v.inventory_added_date) AS "Newest Vehicle Date"
+FROM vehicles v
+JOIN vehicletypes vt
+    ON v.vehicle_type_id = vt.vehicle_type_id
+WHERE v.is_sold = FALSE
+GROUP BY vt.make, vt.model
+ORDER BY "Count in Stock" DESC, vt.make, vt.model;
+```
+
+**Sample Output:**
+
+| Make | Model | Count in Stock | Oldest Vehicle Date | Newest Vehicle Date |
+|------|-------|----------------|---------------------|---------------------|
+| Toyota | Camry | 12 | 2020-03-15 | 2024-08-22 |
+| Ford | F-150 | 10 | 2021-01-04 | 2024-08-17 |
+| Honda | Accord | 8 | 2021-07-19 | 2024-08-10 |
+| Chevrolet | Silverado | 7 | 2021-03-11 | 2024-08-05 |
+| Nissan | Altima | 6 | 2022-02-20 | 2024-07-29 |
+
+**Key Finding:**
+I have no idea lol
+
+**Actionable Recommendation:**
+I'm guessing they'll want to sell cars that have been hanging around on the lot longer
+
+
 ---
 
 #### 2.2 Inventory Count by Make
@@ -132,6 +167,37 @@ Your team must complete **all required reports** in Sections 1-4. Section 5 cont
 |------|------------|---------------------|------------|
 | Ford | 45 | 67 | $1,234,567 |
 | ... | ... | ... | ... |
+
+**Query:**
+```sql
+SELECT
+    vt.make AS "Make",
+    COUNT(*) AS "Total Count",
+    CAST(AVG(CURRENT_DATE - v.inventory_added_date) AS int) AS "Avg Days in Inventory", -- today's date minus inventory_added_date, and then get the average, and then make the decimal an integer
+    TO_CHAR(SUM(v.msr_price), 'L999,999,990.00') AS "Total Value" -- Thank you Hannah!
+FROM vehicles v
+JOIN vehicletypes vt
+    ON v.vehicle_type_id = vt.vehicle_type_id
+WHERE v.is_sold = FALSE -- make sure it hasn't been sold yet
+GROUP BY vt.make
+ORDER BY "Total Count" DESC, "Avg Days in Inventory" DESC;
+```
+
+**Sample Output:**
+
+| Make | Total Count | Avg Days in Inventory | Total Value |
+|------|-------------|----------------------|-------------|
+| Ford | 45 | 134 | $1,234,567 |
+| Toyota | 38 | 118 | $1,045,320 |
+| Chevrolet | 34 | 142 | $934,780 |
+| Honda | 29 | 97 | $712,450 |
+| Nissan | 22 | 109 | $543,210 |
+
+**Key Finding:**
+Shows how much money can be made / has not been made from old inventory
+
+**Actionable Recommendation:**
+Same as 2.1? Clear older cars?
 
 ---
 
