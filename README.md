@@ -144,17 +144,17 @@ ORDER BY "Count in Stock" DESC, vt.make, vt.model;
 
 | Make | Model | Count in Stock | Oldest Vehicle Date | Newest Vehicle Date |
 |------|-------|----------------|---------------------|---------------------|
-| Toyota | Camry | 12 | 2020-03-15 | 2024-08-22 |
-| Ford | F-150 | 10 | 2021-01-04 | 2024-08-17 |
-| Honda | Accord | 8 | 2021-07-19 | 2024-08-10 |
-| Chevrolet | Silverado | 7 | 2021-03-11 | 2024-08-05 |
-| Nissan | Altima | 6 | 2022-02-20 | 2024-07-29 |
+| Nissan | Maxima | 606 | 2008-10-09 | 2026-03-14 |
+| Nissan | Altima | 423 | 2008-10-17 | 2026-03-14 |
+| Ford | Fusion | 413 | 2008-10-19 | 2026-03-14 |
+| Volkswagen | Passat | 404 | 2008-10-13 | 2026-03-14 |
+| Chevrolet | Blazer | 398 | 2008-10-05 | 2026-03-14 |
 
 **Key Finding:**
-I have no idea lol
+Nissan has 2 models at the top that have been in inventory the longest
 
 **Actionable Recommendation:**
-I'm guessing they'll want to sell cars that have been hanging around on the lot longer
+I'm guessing they'll want to sell these models that have been hanging around on the lot longer
 
 
 ---
@@ -187,14 +187,14 @@ ORDER BY "Total Count" DESC, "Avg Days in Inventory" DESC;
 
 | Make | Total Count | Avg Days in Inventory | Total Value |
 |------|-------------|----------------------|-------------|
-| Ford | 45 | 134 | $1,234,567 |
-| Toyota | 38 | 118 | $1,045,320 |
-| Chevrolet | 34 | 142 | $934,780 |
-| Honda | 29 | 97 | $712,450 |
-| Nissan | 22 | 109 | $543,210 |
+| Nissan | 1398 | 511 | $24,372,510.00 |
+| Chevrolet | 1164 | 547 | $20,330,690.00 |
+| Ford | 1063 | 644 | $18,541,067.00 |
+| Mazda | 828 | 484 | $14,473,922.00 |
+| Volkswagen | 607 | 535 | $10,577,718.00 |
 
 **Key Finding:**
-Shows how much money can be made / has not been made from old inventory
+Shows how much money can be made / has not been made from old inventory and which makes have been around the longest. Nissan is at the top again.
 
 **Actionable Recommendation:**
 Same as 2.1? Clear older cars?
@@ -210,6 +210,40 @@ Same as 2.1? Clear older cars?
 | SUV | 67 | 34.5% | $42,345 |
 | Sedan | 54 | 27.8% | $28,956 |
 | ... | ... | ... | ... |
+
+**Query:**
+```sql
+SELECT
+    vt.body_type AS "Body Type",
+    COUNT(*) AS "Count",
+    ROUND((COUNT(*) / SUM(COUNT(*)) OVER ()) * 100.0, 1) || '%' AS "Percentage of Inventory",
+    -- (count of this body type / total cars in inventory) * 100
+    -- Then round to 1 decimal place and add a % sign
+    TO_CHAR(AVG(v.msr_price), 'L999,999,990.00') AS "Avg Price" -- Thank you again Hannah!
+FROM vehicles v
+JOIN vehicletypes vt
+    ON v.vehicle_type_id = vt.vehicle_type_id
+WHERE v.is_sold = FALSE -- make sure car hasn't been sold yet
+GROUP BY vt.body_type
+ORDER BY
+    ROUND((COUNT(*) / SUM(COUNT(*)) OVER ()) * 100.0, 1) DESC, -- I couldn't get it to sort right using the alias
+    "Avg Price" DESC;
+```
+
+**Sample Output:**
+
+| Body Type | Count | Percentage of Inventory | Avg Price |
+|-----------|-------|-------------------------|-----------|
+| Car | 2663 | 52.6% | $17,434.38 |
+| SUV | 1202 | 23.8% | $17,447.07 |
+| Truck | 969 | 19.2% | $17,492.74 |
+| Van | 226 | 4.5% | $17,461.61 |
+
+**Key Finding:**
+Cars show up as the issue again here. I bet they are Nissans, too.
+
+**Actionable Recommendation:**
+Run a sale on car body types.
 
 ---
 
