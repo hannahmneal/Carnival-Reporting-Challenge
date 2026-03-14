@@ -57,3 +57,19 @@ ORDER BY
 
 -- 2.4 Slow-Moving Inventory
 -- Business Question: Which vehicles have been in inventory the longest without selling?
+
+SELECT
+    'V-' || v.vehicle_id AS "Vehicle ID",  -- add 'V-' prefix
+    vt.make AS "Make",
+    vt.model AS "Model",
+    v.year_of_car AS "Year",
+    CURRENT_DATE - v.inventory_added_date AS "Days in Inventory", -- today minus date
+    TO_CHAR(v.msr_price, 'FML999,999,990.00') AS "Purchase Price", -- formatting for $ price
+    TO_CHAR(v.floor_price, 'FML999,999,990.00') AS "Asking Price" -- formatting for $ price
+FROM vehicles v
+JOIN vehicletypes vt
+    ON v.vehicle_type_id = vt.vehicle_type_id
+WHERE v.is_sold = FALSE
+ORDER BY
+    "Days in Inventory" DESC, v.floor_price DESC;
+    

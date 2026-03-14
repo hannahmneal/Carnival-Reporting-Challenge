@@ -126,6 +126,11 @@ Your team must complete **all required reports** in Sections 1-4. Section 5 cont
 
 **Query:**
 ```sql
+
+-- Report 2.1: Inventory Count by Model
+-- Author: Jen
+-- Date: 2026-03-14 happy pi day
+
 SELECT
     vt.make AS "Make",
     vt.model AS "Model",
@@ -170,6 +175,11 @@ I'm guessing they'll want to sell these models that have been hanging around on 
 
 **Query:**
 ```sql
+
+-- Report 2.2: Inventory Count by Make
+-- Author: Jen
+-- Date: 2026-03-14
+
 SELECT
     vt.make AS "Make",
     COUNT(*) AS "Total Count",
@@ -213,6 +223,11 @@ Same as 2.1? Clear older cars?
 
 **Query:**
 ```sql
+
+-- Report 2.3: Inventory Count by Body Type
+-- Author: Jen
+-- Date: 2026-03-14
+
 SELECT
     vt.body_type AS "Body Type",
     COUNT(*) AS "Count",
@@ -240,7 +255,7 @@ ORDER BY
 | Van | 226 | 4.5% | $17,461.61 |
 
 **Key Finding:**
-Cars show up as the issue again here. I bet they are Nissans, too.
+Cars show up as the issue again here. I bet they are Nissans, too!
 
 **Actionable Recommendation:**
 Run a sale on car body types.
@@ -255,6 +270,47 @@ Run a sale on car body types.
 |-----------|------|-------|------|------------------|---------------|-------------|
 | V-4582 | Chevrolet | Suburban | 2019 | 342 | $38,500 | $42,000 |
 | ... | ... | ... | ... | ... | ... | ... |
+
+**Query:**
+
+-- Report 2.4: Slow-Moving Inventory
+-- Author: Jen
+-- Date: 2026-03-14
+
+```sql
+SELECT
+    'V-' || v.vehicle_id AS "Vehicle ID", -- add 'V-' prefix
+    vt.make AS "Make",
+    vt.model AS "Model",
+    v.year_of_car AS "Year",
+    CURRENT_DATE - v.inventory_added_date AS "Days in Inventory", -- today minus date
+    TO_CHAR(v.msr_price, 'FML999,999,990.00') AS "Purchase Price", -- formatting for $ price
+    TO_CHAR(v.floor_price, 'FML999,999,990.00') AS "Asking Price" -- formatting for $ price
+FROM vehicles v
+JOIN vehicletypes vt
+    ON v.vehicle_type_id = vt.vehicle_type_id
+WHERE v.is_sold = FALSE
+ORDER BY
+    "Days in Inventory" DESC, v.floor_price DESC;
+```
+
+**Sample Output:**
+
+| Vehicle ID | Make | Model | Year | Days in Inventory | Purchase Price | Asking Price |
+|------------|------|-------|------|-------------------|----------------|--------------|
+| V-178 | Chevrolet | Blazer | 2021 | 6369 | $19,834.00 | $33,947.00 |
+| V-543 | Mazda | MX-5 Miata | 2021 | 6369 | $16,464.00 | $31,261.00 |
+| V-116 | Nissan | Maxima | 2019 | 6365 | $16,841.00 | $34,127.00 |
+| V-997 | Chevrolet | Corvette | 2024 | 6365 | $18,064.00 | $32,813.00 |
+| V-572 | Volkswagen | Passat | 2024 | 6361 | $18,097.00 | $28,007.00 |
+
+**Key Finding:**
+Some cars have been in inventory for a very long time. 
+
+(And the database does some time travelling. The dates are weird because actual vehicle year dates & sale dates don't make sense. )
+
+**Actionable Recommendation:**
+Added incentives / extra sales to move the inventory.
 
 ---
 
