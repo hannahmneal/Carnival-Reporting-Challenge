@@ -28,10 +28,35 @@ order by c.state
 -- Business Question: Which 5 states have customers with the highest average purchase price?
 --============================================================================================
 
+with
+    state_purchases
+    as
+    (
+        select
+            distinct c.state as "State",
+            '$ ' || round(avg(s.price) over (partition by c.state), 2) as "Avg Purchase Price",
+            count(s.customer_id) over (partition by c.state) as "Customers",
+            '$ ' || round(sum(s.price) over(partition by c.state), 2) as "Total Sales Revenue",
+            round(avg(s.price) over (partition by c.state), 2) as state_avg
+        from sales s
+            join customers c on s.customer_id = c.customer_id
+    )
+select
+    "State",
+    "Avg Purchase Price",
+    "Customers",
+    "Total Sales Revenue",
+    rank() over (order by state_avg desc) as "Rank"
+from state_purchases
+order by "Total Sales Revenue"
 
 -- OUTPUT:
 /*
- 
+| State | Avg Purchase Price | Customers | Total Sales Revenue | Rank |
+|---|---|---|---|---|
+| IL | $ 59203.97 | 173 | $ 10242286.27 | 23 |
+| AK | $ 64701.68 | 17 | $ 1099928.52 | 5 |
+| RI | $ 52823.18 | 23 | $ 1214933.14 | 47 |
  */
 
 --============================================================================================
@@ -54,3 +79,4 @@ order by c.state
 /*
  
  */
+
