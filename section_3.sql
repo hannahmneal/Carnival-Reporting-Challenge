@@ -65,6 +65,12 @@ order by "Total Sales Revenue"
 -- Business Question: Which customers have purchased multiple vehicles? Who are our most loyal customers?
 --============================================================================================
 
+select
+    c.customer_id,
+    count(s.vehicle_id) over (partition by c.customer_id) as vehicles_per_customer
+from customers c
+    join sales s on c.customer_id = s.customer_id
+
 -- OUTPUT:
 /*
  
